@@ -1,4 +1,4 @@
 Django
 mysqlclient
 django-crispy-forms
-crispy-bootstrap5
+crispy-bootstrap4
