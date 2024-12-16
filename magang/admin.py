@@ -4,8 +4,8 @@ from django.contrib import admin
 from magang.models import MahasiswaMagang
 
 
-class MahasiswaMagangAdmin(admin.ModelAdmin):
+class MahasiswaMagangCantik(admin.ModelAdmin):
     list_display = [f.name for f in MahasiswaMagang._meta.fields]
-    search_fields = ('short_url','pemilik_url')
+    search_fields = ('nama','proyek_magang')
 
-admin.site.register(MahasiswaMagang, MahasiswaMagangAdmin)
+admin.site.register(MahasiswaMagang, MahasiswaMagangCantik)

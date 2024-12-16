@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'crispy_forms',
-    'crispy_bootstrap4',
-    'magang',
+    'crispy_forms', #untuk membuat form lebih rapi. tapna perlu set css sendiri
+    'crispy_bootstrap4', #dependency bootstrap4
+    'magang', #nama aplikasi
 ]
 
 MIDDLEWARE = [
@@ -65,7 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'MagangProject.context_processor.app_settings',
+                'MagangProject.context_processor.app_settings', #setting context global
             ],
         },
     },

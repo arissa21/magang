@@ -26,6 +26,7 @@ def data_magang(request):
     '''
     context = {}
     template = 'magang/data_magang.html'
+    #data yang mau ditampilkan, diurutkan berdasarkan id terberu
     magang_list = MahasiswaMagang.objects.all().order_by('-id')
 
     #filter berdasarkan status magang
@@ -91,6 +92,9 @@ def delete_magang(request, id):
 
 @login_required
 def get_data(request, id):
+    '''
+        -mengambil data untuk modal
+        '''
     try:
         data = MahasiswaMagang.objects.get(pk=id)
         response = {
