@@ -19,11 +19,15 @@ from django.contrib import admin
 from django.urls import path, re_path, include
 from django.views.static import serve
 from magang import views
+from django.contrib.auth import views as auth_views
 
 from MagangProject import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('login/', auth_views.LoginView.as_view(redirect_authenticated_user=True, template_name='login.html'), name='login'),
+    path('logoutods/', auth_views.LogoutView.as_view(), name='logout'),
+
     path('', views.home, name='home'),
     path('magang/', include('magang.urls')),
 ]

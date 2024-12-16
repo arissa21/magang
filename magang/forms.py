@@ -12,22 +12,6 @@ class MahasiswaMagangForm(forms.ModelForm):
         widgets = {
             'tanggal_mulai': forms.DateInput(attrs={'type': 'date'}),
             'tanggal_selesai': forms.DateInput(attrs={'type': 'date'}),
+            'keterangan': forms.Textarea(attrs={'rows':3}),
+            'status_magang': forms.Select(attrs={'class':'form-control'})
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'POST'
-        self.helper.form_class = 'form-horizontal'  # Add optional Bootstrap styling
-        self.helper.layout = Layout(
-            Field('nama'),
-            Field('email'),
-            Field('no_hp'),
-            Field('asal_universitas'),
-            Field('tanggal_mulai'),
-            Field('tanggal_selesai'),
-            Field('status_magang'),
-            Field('proyek_magang'),
-            Field('keterangan'),
-        )
-        self.helper.add_input(Submit('submit', 'Simpan'))

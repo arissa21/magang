@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+<!-- Include DataTables CSS -->
+<link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet" >
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Data Magang Mahasiswa</h1>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+    {% if messages %}
+    <div class="alert-messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <!-- Earnings (Monthly) Card Example -->
+    <div class="col-xl-12 col-md-12 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <!-- Button trigger modal -->
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                    Tambah <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+
+                            <div class="col-auto">
+                                <form action="" method="get" class="form-inline">
+                                    <div class="form-group">
+                                        <label class="bold">Status:</label>
+                                        <select name="status" class="form-control" style="display: inline;" onchange="this.form.submit()">
+                                            <option value="0" {% if status == 0 %}selected{% endif %}>Semua</option>
+                                            <option value="1" {% if status == 1 %}selected{% endif %}>Aktif</option>
+                                            <option value="2" {% if status == 2 %}selected{% endif %}>Selesai</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
+                        <hr/>
+                        <div class="dt-responsive table-responsive">
+                            <table id="simpletable" class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama</th>
+                                    <th>Asal Univ</th>
+                                    <th>Kontak</th>
+                                    <th>Periode Magang</th>
+                                    <th>Nama Proyek</th>
+                                    <th>Pembimbing</th>
+                                    <th>Status</th>
+                                    <th>Keterangan</th>
+                                    <th>Input</th>
+                                    <th>Aksi</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for d in magang_list %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ d.nama }}</td>
+                                    <td>{{ d.asal_universitas }}</td>
+                                    <td>
+                                        <ul>
+                                            <li>email: {{ d.email }}</li>
+                                            <li>No HP: {{ d.no_hp }}</li>
+                                        </ul>
+                                    </td>
+                                    <td>{{ d.tanggal_mulai}} s/d {{ d.tanggal_selesai }}</td>
+                                    <td>{{ d.proyek_magang }}</td>
+                                    <td>{{ d.pembimbing }}</td>
+                                    <td>{{ d.get_status_magang_display }}</td>
+                                    <td>{{ d.keterangan }}</td>
+                                    <td>
+                                        <ul>
+                                            <li>Diinput oleh: {{d.created_by}}</li>
+                                            <li>Pada: {{d.created_at}}</li>
+                                            <li>Terakhir update: {{d.updated_at}}</li>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'edit_magang' d.id %}"
+                                           class="btn btn-warning edit-button">Edit</a>
+                                        <a href="{% url 'delete_magang' d.id %}" class="btn btn-danger hapusItem">Hapus</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
+     {% if edit %} data-bs-backdrop="static" data-bs-keyboard="false" {% endif %}>
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Form Data Magang</h1>
+                {% if not edit %}
+                <button type="button" class="btn-close btn-x" data-bs-dismiss="modal" aria-label="Close"></button>
+                {% endif %}
+            </div>
+            <div class="modal-body">
+                <form action="" method="post" id="add_data_magang" name="form_add_data_magang" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-body">
+                        <div class="form-group" style="padding:0 15% 0 15%;">
+                            {{form|crispy}}
+                            <input type="submit" form="add_data_magang" name="form_add_data_magang"
+                                   class="btn btn-success" value="Simpan">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                {% if not edit %}
+                <button type="button" class="btn btn-warning btn-x" data-bs-dismiss="modal">Close</button>
+                {% else %}
+                <a href="{% url 'data_magang' %}" class="btn btn-danger float-right">Batal</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<!-- Include DataTables JS -->
+<script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('#simpletable').DataTable({
+            searching: false,      // Menonaktifkan fitur pencarian
+            lengthChange: false    // Menonaktifkan opsi untuk mengubah jumlah entri yang ditampilkan
+        });  // Menjadikan tabel dengan id 'simpletable' menjadi DataTable
+
+        {% if edit %}
+        $('#id_tanggal_mulai').val('{{magang_edit.tanggal_mulai|date:'Y-m-d'}}');
+        $('#id_tanggal_selesai').val('{{magang_edit.tanggal_selesai|date:"Y-m-d"}}');
+        $(window).on('load', function() {
+            $('#exampleModal').modal('show');
+        });
+        {% endif %}
+
+        $(".hapusItem").click(function () {
+            if(!confirm("Yakin ingin menghapus?")){
+                return false;
+            };
+        });
+    });
+
+</script>
+
+{% endblock %}

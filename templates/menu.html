@@ -22,6 +22,7 @@
     <hr class="sidebar-divider">
 
     <!-- Heading -->
+    {% if request.user.is_superuser %}
     <div class="sidebar-heading">
         Administrator
     </div>
@@ -35,10 +36,11 @@
         </a>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <a class="collapse-item" href="">Data Mahasiswa</a>
+                <a class="collapse-item" href="{% url 'data_magang' %}">Data Mahasiswa</a>
             </div>
         </div>
     </li>
+    {% endif %}
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

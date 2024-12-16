@@ -4,5 +4,5 @@ def app_settings(request):
     """
     return {
         'APP_TITLE': 'Dashboard Mahasiswa Magang Disdukcapil Surakarta',
-        'APP_NAME': 'Magang Dukcapil <sup>Surakarta</sup>',
+        'APP_NAME': 'Magang Dukcapil <strong>Surakarta</strong>',
     }
