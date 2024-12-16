@@ -1,0 +1,22 @@
+{% load crispy_forms_tags %}
+<!-- Modal -->
+<div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalFormLabel">Form Magang Mahasiswa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="magangForm" method="POST">
+                    {% csrf_token %}
+                    {{ form|crispy }}  <!-- Render form using Crispy Forms -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                <button type="submit" class="btn btn-primary" form="magangForm">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
