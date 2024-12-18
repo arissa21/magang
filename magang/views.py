@@ -114,3 +114,30 @@ def get_data(request, id):
         return JsonResponse(response)
     except MahasiswaMagang.DoesNotExist:
         return JsonResponse({'error': 'Data tidak ditemukan'}, status=404)
+
+@login_required()
+def ajax_cari_magang(request):
+    query = request.GET.get('cari', '')
+    if query:
+        magang_list = MahasiswaMagang.objects.filter(
+            Q(nama__icontains=query) |
+            Q(proyek_magang__icontains=query) |
+            Q(pembimbing__icontains=query)
+        )
+    else:
+        magang_list = MahasiswaMagang.objects.all()
+
+    results = []
+    for magang in magang_list:
+        results.append({
+            'id': magang.id,
+            'nama': magang.nama,
+            'asal_universitas': magang.asal_universitas,
+            'tanggal_mulai': magang.tanggal_mulai.strftime('%Y-%m-%d') if magang.tanggal_mulai else None,
+            'tanggal_selesai': magang.tanggal_selesai.strftime('%Y-%m-%d') if magang.tanggal_selesai else None,
+            'proyek_magang': magang.proyek_magang,
+            'pembimbing': magang.pembimbing,
+            'status': magang.get_status_magang_display(),  # Ambil label dari choice
+        })
+
+    return JsonResponse({'results': results})
