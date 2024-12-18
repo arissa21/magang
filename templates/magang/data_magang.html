@@ -169,7 +169,7 @@
         $('#simpletable').DataTable({
             searching: false,      // Menonaktifkan fitur pencarian
             lengthChange: false    // Menonaktifkan opsi untuk mengubah jumlah entri yang ditampilkan
-        });  // Menjadikan tabel dengan id 'simpletable' menjadi DataTable
+        });
 
         {% if edit %}
         $('#id_tanggal_mulai').val('{{magang_edit.tanggal_mulai|date:'Y-m-d'}}');
@@ -180,68 +180,59 @@
         {% endif %}
 
         $(".hapusItem").click(function () {
-            if(!confirm("Yakin ingin menghapus?")){
+            if (!confirm("Yakin ingin menghapus?")) {
                 return false;
-            };
-        });
-
-
-    });
-
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    const cariInput = document.getElementById('cari-input');
-    const tbody = document.querySelector('#simpletable tbody');
-
-    cariInput.addEventListener('keyup', function () {
-        const query = this.value;
-        fetch(`/magang/ajax/cari-magang/?cari=${encodeURIComponent(query)}`, {
-            method: 'GET',
-        })
-        .then(response => response.json())
-        .then(data => {
-            tbody.innerHTML = ''; // Kosongkan isi tabel sebelumnya
-
-            if (data.results.length > 0) {
-                data.results.forEach((item, index) => {
-                    const row = document.createElement('tr');
-
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${item.nama}</td>
-                        <td>${item.asal_universitas || '-'}</td>
-                        <td>${item.tanggal_mulai || '-'} s/d ${item.tanggal_selesai || '-'}</td>
-                        <td>${item.proyek_magang}</td>
-                        <td>${item.pembimbing}</td>
-                        <td>${item.status || '-'}</td>
-                        <td align="center">
-                            <button class="btn btn-primary view-data" data-id="${item.id}" data-toggle="modal" data-target="#dataModal">Lihat</button>
-                            <a href="/magang/edit/${item.id}" class="btn btn-warning edit-button">Edit</a>
-                            <a href="/magang/delete/${item.id}" class="btn btn-danger hapusItem">Hapus</a>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } else {
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `
-                    <td colspan="8" class="text-center">Tidak ada data ditemukan</td>
-                `;
-                tbody.appendChild(emptyRow);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
         });
-    });
-});
 
-</script>
+        // Pencarian AJAX
+        const cariInput = document.getElementById('cari-input');
+        const tbody = document.querySelector('#simpletable tbody');
 
-<script>
-    $('.view-data').on('click', function() {
+        cariInput.addEventListener('keyup', function () {
+            const query = this.value;
+            fetch(`/magang/ajax/cari-magang/?cari=${encodeURIComponent(query)}`, {
+                method: 'GET',
+            })
+            .then(response => response.json())
+            .then(data => {
+                tbody.innerHTML = ''; // Kosongkan isi tabel sebelumnya
+
+                if (data.results.length > 0) {
+                    data.results.forEach((item, index) => {
+                        const row = document.createElement('tr');
+
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.nama}</td>
+                            <td>${item.asal_universitas || '-'}</td>
+                            <td>${item.tanggal_mulai || '-'} s/d ${item.tanggal_selesai || '-'}</td>
+                            <td>${item.proyek_magang}</td>
+                            <td>${item.pembimbing}</td>
+                            <td>${item.status || '-'}</td>
+                            <td align="center">
+                                <button class="btn btn-primary view-data" data-id="${item.id}" data-toggle="modal" data-target="#dataModal">Lihat</button>
+                                <a href="/magang/edit/${item.id}" class="btn btn-warning edit-button">Edit</a>
+                                <a href="/magang/delete/${item.id}" class="btn btn-danger hapusItem">Hapus</a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td colspan="8" class="text-center">Tidak ada data ditemukan</td>
+                    `;
+                    tbody.appendChild(emptyRow);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Event delegation untuk tombol view-data
+        $(document).on('click', '.view-data', function () {
             const dataId = $(this).data('id'); // Ambil ID dari tombol
 
             $.ajax({
@@ -270,6 +261,7 @@
                 }
             });
         });
+    });
 </script>
 
 {% endblock %}
