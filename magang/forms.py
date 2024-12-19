@@ -13,5 +13,7 @@ class MahasiswaMagangForm(forms.ModelForm):
             'tanggal_mulai': forms.DateInput(attrs={'type': 'date'}),
             'tanggal_selesai': forms.DateInput(attrs={'type': 'date'}),
             'keterangan': forms.Textarea(attrs={'rows':3}),
-            'status_magang': forms.Select(attrs={'class':'form-control'})
+            'status_magang': forms.Select(attrs={'class':'form-control'}),
+            'email': forms.EmailInput(attrs={'class':'form-control'}),
+            'no_hp': forms.NumberInput(attrs={'class': 'form-control'}),
         }

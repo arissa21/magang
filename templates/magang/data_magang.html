@@ -16,13 +16,29 @@
 <!-- Content Row -->
 <div class="row">
     {% if messages %}
-    <div class="alert-messages">
+    <div class="alert-messages" style="width:100%">
         {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
+        <div class="alert alert-{{ message.tags }}">
             {{ message }}
         </div>
         {% endfor %}
     </div>
+    {% endif %}
+    <!-- Menampilkan error keseluruhan form -->
+    {% if form.errors %}
+        <div class="alert alert-danger" style="width:100%">
+            <ul>
+                {% for field, error_list in form.errors.items %}
+                    <li>{{ field }}:
+                        <ul>
+                            {% for error in error_list %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
     <!-- Earnings (Monthly) Card Example -->
     <div class="col-xl-12 col-md-12 mb-4">
@@ -61,6 +77,7 @@
                             <tr>
                                 <th>No</th>
                                 <th>Nama</th>
+                                <th>NIM</th>
                                 <th>Asal Univ</th>
                                 <th>Periode Magang</th>
                                 <th>Nama Proyek</th>
@@ -74,6 +91,7 @@
                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ d.nama }}</td>
+                                <td>{{ d.nim }}</td>
                                 <td>{{ d.asal_universitas }}</td>
                                 <td>{{ d.tanggal_mulai}} s/d {{ d.tanggal_selesai }}</td>
                                 <td>{{ d.proyek_magang }}</td>
@@ -97,7 +115,7 @@
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal menampilkan form -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"
      {% if edit %} data-backdrop="static" data-keyboard="false" {% endif %}>
     <div class="modal-dialog modal-xl">
@@ -110,9 +128,12 @@
             </div>
             <div class="modal-body">
                 <form action="" method="post" id="add_data_magang" name="form_add_data_magang" enctype="multipart/form-data">
+                    <!--Kode unik yang dihasilkan oleh Django dan disertakan dalam setiap form di aplikasi web.
+                    Token ini hanya bisa digunakan di sesi yang valid untuk mencegah permintaan yang tidak sah.-->
                     {% csrf_token %}
                     <div class="form-body">
                         <div class="form-group" style="padding:0 15% 0 15%;">
+                            <!--Panggil form dari forms.py dengan styling menggunakan crispy.-->
                             {{form|crispy}}
                             <input type="submit" form="add_data_magang" name="form_add_data_magang"
                                    class="btn btn-success" value="Simpan">
@@ -124,13 +145,14 @@
                 {% if not edit %}
                 <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
                 {% else %}
-                <a href="{% url 'data_magang' %}" class="btn btn-danger float-right">Batal</a>
+                <button type="button" class="btn btn-danger float-right" onclick="goBack()">Batal</button>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
 
+<!--Modal untuk menampilkan detail data-->
 <div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -142,6 +164,7 @@
                 <p><strong>Nama:</strong> <span id="modal-nama"></span></p>
                 <p><strong>Email:</strong> <span id="modal-email"></span></p>
                 <p><strong>No HP:</strong> <span id="modal-hp"></span></p>
+                <p><strong>NIM:</strong> <span id="modal-nim"></span></p>
                 <p><strong>Asal Universitas:</strong> <span id="modal-univ"></span></p>
                 <p><strong>Periode Magang:</strong> <span id="modal-periode"></span></p>
                 <p><strong>Nama Proyek:</strong> <span id="modal-proyek"></span></p>
@@ -166,45 +189,55 @@
 <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
 <script>
     $(document).ready(function () {
+        // Menginisialisasi DataTable pada tabel dengan ID #simpletable
         $('#simpletable').DataTable({
-            searching: false,      // Menonaktifkan fitur pencarian
-            lengthChange: false    // Menonaktifkan opsi untuk mengubah jumlah entri yang ditampilkan
+            searching: false,      // Menonaktifkan fitur pencarian pada DataTable
+            lengthChange: false    // Menonaktifkan opsi untuk mengubah jumlah entri yang ditampilkan per halaman
         });
 
+        // Mengecek apakah variabel 'edit' tersedia pada context, dan jika ya, mengatur tanggal mulai dan selesai
         {% if edit %}
         $('#id_tanggal_mulai').val('{{magang_edit.tanggal_mulai|date:'Y-m-d'}}');
         $('#id_tanggal_selesai').val('{{magang_edit.tanggal_selesai|date:"Y-m-d"}}');
+
+        // Menampilkan modal (popup) ketika halaman sudah sepenuhnya dimuat
         $(window).on('load', function() {
             $('#exampleModal').modal('show');
         });
         {% endif %}
 
-        $(".hapusItem").click(function () {
+        // Event handler untuk tombol hapus
+        $(document).on('click', '.hapusItem', function () {
+            // Menampilkan konfirmasi sebelum menghapus data
             if (!confirm("Yakin ingin menghapus?")) {
-                return false;
+                return false; // Membatalkan penghapusan jika tidak dikonfirmasi
             }
         });
 
-        // Pencarian AJAX
-        const cariInput = document.getElementById('cari-input');
-        const tbody = document.querySelector('#simpletable tbody');
+        // Pencarian menggunakan AJAX untuk mencari data magang berdasarkan input pengguna
+        const cariInput = document.getElementById('cari-input');  // Mendapatkan elemen input pencarian
+        const tbody = document.querySelector('#simpletable tbody');  // Mendapatkan elemen tbody pada tabel
 
+        // Ketika pengguna mengetik di input pencarian
         cariInput.addEventListener('keyup', function () {
-            const query = this.value;
+            const query = this.value;  // Mengambil nilai input pencarian
+            // Mengirim permintaan AJAX ke server untuk mencari data berdasarkan query
             fetch(`/magang/ajax/cari-magang/?cari=${encodeURIComponent(query)}`, {
                 method: 'GET',
             })
-            .then(response => response.json())
+            .then(response => response.json())  // Mengambil data yang diterima dalam format JSON
             .then(data => {
-                tbody.innerHTML = ''; // Kosongkan isi tabel sebelumnya
+                tbody.innerHTML = '';  // Menghapus isi tabel sebelumnya
 
+                // Memeriksa apakah ada hasil pencarian
                 if (data.results.length > 0) {
                     data.results.forEach((item, index) => {
+                        // Membuat baris baru untuk setiap hasil pencarian
                         const row = document.createElement('tr');
-
                         row.innerHTML = `
                             <td>${index + 1}</td>
                             <td>${item.nama}</td>
+                            <td>${item.nim}</td>
                             <td>${item.asal_universitas || '-'}</td>
                             <td>${item.tanggal_mulai || '-'} s/d ${item.tanggal_selesai || '-'}</td>
                             <td>${item.proyek_magang}</td>
@@ -216,33 +249,36 @@
                                 <a href="/magang/delete/${item.id}" class="btn btn-danger hapusItem">Hapus</a>
                             </td>
                         `;
-                        tbody.appendChild(row);
+                        tbody.appendChild(row);  // Menambahkan baris ke dalam tabel
                     });
                 } else {
+                    // Jika tidak ada hasil, tampilkan pesan 'Tidak ada data ditemukan'
                     const emptyRow = document.createElement('tr');
                     emptyRow.innerHTML = `
                         <td colspan="8" class="text-center">Tidak ada data ditemukan</td>
                     `;
-                    tbody.appendChild(emptyRow);
+                    tbody.appendChild(emptyRow);  // Menambahkan baris kosong ke dalam tabel
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
+                console.error('Error:', error);  // Menangani kesalahan jika permintaan gagal
             });
         });
 
-        // Event delegation untuk tombol view-data
+        // Event delegation untuk tombol 'Lihat' pada setiap baris
         $(document).on('click', '.view-data', function () {
-            const dataId = $(this).data('id'); // Ambil ID dari tombol
+            const dataId = $(this).data('id');  // Mengambil ID data dari tombol 'Lihat'
 
+            // Mengirimkan permintaan AJAX untuk mendapatkan data detail berdasarkan ID
             $.ajax({
-                url: `/magang/get-data/${dataId}/`,  // URL untuk mengambil data dari server
+                url: `/magang/get-data/${dataId}/`,  // URL untuk mengambil data detail
                 method: 'GET',
                 success: function(response) {
-                    // Update isi modal dengan data dari server
+                    // Mengisi modal dengan data yang diterima
                     $('#modal-nama').text(response.nama);
                     $('#modal-email').text(response.email);
                     $('#modal-hp').text(response.hp);
+                    $('#modal-nim').text(response.nim);
                     $('#modal-univ').text(response.univ);
                     $('#modal-periode').text(response.periode);
                     $('#modal-proyek').text(response.proyek);
@@ -253,15 +289,20 @@
                     $('#modal-created_at').text(response.created_at);
                     $('#modal-updated_at').text(response.updated_at);
 
-                    // Tampilkan modal (opsional jika modal tidak otomatis tampil)
+                    // Menampilkan modal dengan data yang telah diisi
                     $('#dataModal').modal('show');
                 },
                 error: function(xhr, status, error) {
-                    console.error('Gagal mengambil data:', error);
+                    console.error('Gagal mengambil data:', error);  // Menangani kesalahan jika permintaan gagal
                 }
             });
         });
     });
+
+    // Fungsi untuk kembali ke halaman sebelumnya
+    function goBack() {
+        window.history.back();
+    }
 </script>
 
 {% endblock %}
